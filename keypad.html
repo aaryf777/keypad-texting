@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keypad texting</title>
+    <style>
+        .mobile {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 16px;
+            box-shadow: 3px 4px #e0e0e0;
+            height: inherit;
+            width: 25vw;
+            background-color: black;
+            padding: 8px;
+        }
+
+        .screen {
+            height: 20vh;
+            width: 98%;
+            margin: auto;
+            border: 2px solid rgb(152, 253, 152);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+
+        }
+
+        .screen>textarea {
+            border-radius: 8px;
+            width: 95%;
+            height: 92%;
+            background: #e0e0e0;
+            border: none;
+            resize: none;
+            font-size: 17px;
+        }
+
+        .brand {
+            margin-top: 5%;
+            margin-bottom: 5%;
+            padding: 15px;
+            color: #ffffff;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid gray;
+            border-top: 1px solid gray;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+
+        }
+
+        .buttons>button {
+            width: 30%;
+            padding: 6px 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: rgb(152, 253, 152);
+            background: gray;
+            border: 1px solid rgb(152, 253, 152);
+            outline: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .buttons>button:last-child {
+            width: 90%;
+            padding: 12px 14px;
+        }
+
+        @media screen and (max-width:800px) {
+            .mobile {
+                height: 100vh;
+                width: 95%;
+                top: 0;
+                left: 0;
+                transform: translate(0, 0);
+                overflow-y: none;
+                border-radius: 0;
+            }
+
+            .screen {
+                height: 36vh;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mobile">
+        <div class="screen">
+            <textarea name="text" id="text"></textarea>
+        </div>
+        <div class="brand">PHONE</div>
+        <div class="buttons" id="buttons"></div>
+        <button id="clear" class="clear">Clear</button>
+    </div>
+    <script>
+
+        let text = '';
+        let AlphaNumMap = (function () {
+            let AlphaNumMap = {
+                '1': ['1', '@', '%', '$'],
+                '2': ['2', 'a', 'b', 'c'],
+                '3': ['3', 'd', 'e', 'f'],
+                '4': ['4', 'g', 'h', 'i'],
+                '5': ['5', 'j', 'k', 'l'],
+                '6': ['6', 'm', 'n', 'o'],
+                '7': ['7', 'p', 'q', 'r', 's'],
+                '8': ['8', 't', 'u', 'v'],
+                '9': ['9', 'w', 'x', 'y', 'z'],
+                '*': ['*', '-', '+', '/'],
+                '0': ['0', ' ', '_'],
+                '#': ['#', '&', '=', '!']
+            }
+            const parent = document.getElementById('buttons');
+            Object.entries(AlphaNumMap).forEach(([key, value]) => {
+                const button = document.createElement('button');
+                button.innerHTML = `<span>${key}</span><span>${value.slice(1).join(' ')}</span>`
+                parent.append(button);
+                parent.append(document.getElementById('clear'))
+                button.addEventListener('click', e => buffer(key, value))
+            })
+            return AlphaNumMap;
+        }())
+        const renderTextToDom = () => document.getElementById('text').innerText = text;
+
+        let buffer = (() => {
+            let timerObj = {}
+            prev = '';
+            itr = 0;
+            return (key, value) => {
+                if (key === prev) {
+                    text = text.split('').slice(0, -1).join('');
+                    (itr >= AlphaNumMap[key].length - 1) ? itr = 0 : ++itr;
+                    text += value[itr];
+                    renderTextToDom();
+                    clearTimeout(timerObj[key]);
+                } else {
+                    text += value[itr=0]
+                    renderTextToDom();
+                    clearTimeout(timerObj[prev]);
+                    prev = key;
+                }
+                timerObj[key] = setTimeout(() => {
+                        prev = '';
+                        itr = 0;
+                 }, 1000)
+                
+            }
+        })()
+
+        document.getElementById('clear').addEventListener('click', e => {
+            text = text.split('').slice(0, -1).join('');
+            renderTextToDom();
+        })
+    </script>
+</body>
+
+</html>
